@@ -61,7 +61,7 @@ public class EmployeeController extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String action = request.getServletPath();
         switch (action) {
             case "/save":
@@ -101,7 +101,7 @@ public class EmployeeController extends HttpServlet {
         view.forward(request, response);
     }
 
-    private void saveEmployee(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void saveEmployee(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             Employee employee = Employee.builder()
                     .name(request.getParameter("name"))
@@ -137,7 +137,7 @@ public class EmployeeController extends HttpServlet {
         view.forward(request, response);
     }
 
-    private void updateEmployee(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void updateEmployee(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             Employee employee = Employee.builder()
                     .employeeId(Integer.parseInt(request.getParameter("id")))
