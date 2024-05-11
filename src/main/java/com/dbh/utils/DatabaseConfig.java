@@ -1,11 +1,13 @@
 package com.dbh.utils;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 
 import static com.dbh.utils.AppConstant.*;
 
-
+@Slf4j
 public class DatabaseConfig {
 
     public static Connection getconnection() {
@@ -13,14 +15,10 @@ public class DatabaseConfig {
         try {
             Class.forName(DRIVER);
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("connected");
+            log.info("connected");
         } catch (Exception e) {
-            System.out.println("Not connection");
+            log.info("Not connected");
         }
         return connection;
-    }
-
-    public static void main(String[] args) {
-        DatabaseConfig.getconnection();
     }
 }
