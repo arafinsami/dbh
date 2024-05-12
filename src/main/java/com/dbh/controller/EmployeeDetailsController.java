@@ -26,20 +26,16 @@ public class EmployeeDetailsController extends HttpServlet {
     }
 
     @Override
-    public void init() throws ServletException {
+    public void init() {
         EmployeeDAO employeeDAO = new EmployeeDAOImpl();
         this.employeeService = new EmployeeServiceImpl(employeeDAO);
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try {
-            int employeeId = Integer.parseInt(request.getParameter("id"));
-            Employee employee = employeeService.findById(employeeId);
-            request.setAttribute("employee", employee);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        int employeeId = Integer.parseInt(request.getParameter("id"));
+        Employee employee = employeeService.findById(employeeId);
+        request.setAttribute("employee", employee);
         RequestDispatcher view = request.getRequestDispatcher("/pages/details.jsp");
         view.forward(request, response);
     }

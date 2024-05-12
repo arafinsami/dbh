@@ -31,12 +31,8 @@ public class EmployeeDeleteController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try {
-            int employeeId = Integer.parseInt(request.getParameter("id"));
-            employeeService.delete(employeeId);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        int employeeId = Integer.parseInt(request.getParameter("id"));
+        employeeService.delete(employeeId);
         response.sendRedirect("/");
     }
 }

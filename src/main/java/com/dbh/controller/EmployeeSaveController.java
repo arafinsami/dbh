@@ -28,7 +28,7 @@ public class EmployeeSaveController extends HttpServlet {
     }
 
     @Override
-    public void init() throws ServletException {
+    public void init() {
         EmployeeDAO employeeDAO = new EmployeeDAOImpl();
         this.employeeService = new EmployeeServiceImpl(employeeDAO);
     }
@@ -41,27 +41,12 @@ public class EmployeeSaveController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try {
-            /*String name = request.getParameter("name");
-            String email = request.getParameter("email");
-            String password = request.getParameter("password");
-
-            Employee employee = new Employee();
-            employee.setName(name);
-            employee.setEmail(email);
-            employee.setPassword(password);*/
-
-            Employee employee = Employee.builder()
-                    .name(request.getParameter("name"))
-                    .email(request.getParameter("email"))
-                    .password(request.getParameter("password"))
-                    .build();
-            employeeService.save(employee);
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
+        Employee employee = Employee.builder()
+                .name(request.getParameter("name"))
+                .email(request.getParameter("email"))
+                .password(request.getParameter("password"))
+                .build();
+        employeeService.save(employee);
         response.sendRedirect("/");
     }
 }

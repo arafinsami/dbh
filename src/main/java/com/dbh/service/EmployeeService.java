@@ -2,20 +2,19 @@ package com.dbh.service;
 
 import com.dbh.entity.Employee;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public interface EmployeeService {
 
-    List<Employee> findAll(int offset, int recordPerPage) throws SQLException;
+    List<Employee> findAll(int offset, int recordPerPage);
 
-    boolean save(Employee employee) throws SQLException;
+    void save(Employee employee);
 
-    boolean update(Employee employee) throws SQLException;
+    void update(Employee employee);
 
-    boolean delete(int id) throws SQLException;
+    void delete(int id);
 
-    Employee findById(int id) throws SQLException;
+    Employee findById(int id);
 
-    int count() throws SQLException;
+    Integer count();
 }

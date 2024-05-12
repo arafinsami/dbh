@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.Serial;
-import java.sql.SQLException;
 import java.util.List;
 
 @WebServlet("/")
@@ -30,7 +29,7 @@ public class EmployeeHomeController extends HttpServlet {
     }
 
     @Override
-    public void init() throws ServletException {
+    public void init() {
         EmployeeDAO employeeDAO = new EmployeeDAOImpl();
         this.employeeService = new EmployeeServiceImpl(employeeDAO);
     }
@@ -41,18 +40,14 @@ public class EmployeeHomeController extends HttpServlet {
         if (request.getParameter("page") != null) {
             page = Integer.parseInt(request.getParameter("page"));
         }
-        try {
-            int recordsPerPage = 5;
-            int offset = (page - 1) * recordsPerPage;
-            List<Employee> employees = employeeService.findAll(offset, recordsPerPage);
-            int totalEmployees = employeeService.count();
-            int totalPages = (int) Math.ceil((double) totalEmployees / recordsPerPage);
-            request.setAttribute("employees", employees);
-            request.setAttribute("totalPages", totalPages);
-            request.setAttribute("currentPage", page);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        int recordsPerPage = 5;
+        int offset = (page - 1) * recordsPerPage;
+        List<Employee> employees = employeeService.findAll(offset, recordsPerPage);
+        int totalEmployees = employeeService.count();
+        int totalPages = (int) Math.ceil((double) totalEmployees / recordsPerPage);
+        request.setAttribute("employees", employees);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("currentPage", page);
         RequestDispatcher view = request.getRequestDispatcher("/pages/home.jsp");
         view.forward(request, response);
     }
