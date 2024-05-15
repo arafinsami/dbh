@@ -2,7 +2,8 @@ package com.dbh.dao.impl;
 
 import com.dbh.dao.EmployeeDAO;
 import com.dbh.entity.Employee;
-import com.dbh.utils.JpaConfig;
+import com.dbh.utils.HibernateConfig;
+import org.hibernate.Session;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -12,9 +13,9 @@ public class EmployeeDAOImpl implements EmployeeDAO {
 
     @Override
     public List<Employee> findAll(int offset, int recordPerPage) {
-        EntityManager em = JpaConfig.getEntityManager();
+        Session session = HibernateConfig.getSession();
         String sql = "SELECT e FROM Employee e ORDER BY e.employeeId ASC";  //JPQL
-        TypedQuery<Employee> emPQuery = em.createQuery(sql, Employee.class);
+        TypedQuery<Employee> emPQuery = session.createQuery(sql, Employee.class);
         emPQuery.setFirstResult(offset);
         emPQuery.setMaxResults(recordPerPage);
         return emPQuery.getResultList();
@@ -22,43 +23,43 @@ public class EmployeeDAOImpl implements EmployeeDAO {
 
     @Override
     public void save(Employee employee) {
-        EntityManager em = JpaConfig.getEntityManager();
-        em.getTransaction().begin();
-        em.persist(employee);
-        em.getTransaction().commit();
-        em.close();
+        Session session = HibernateConfig.getSession();
+        session.getTransaction().begin();
+        session.persist(employee);
+        session.getTransaction().commit();
+        session.close();
     }
 
     @Override
     public void update(Employee employee) {
-        EntityManager em = JpaConfig.getEntityManager();
-        em.getTransaction().begin();
-        em.merge(employee);
-        em.getTransaction().commit();
-        em.close();
+        Session session = HibernateConfig.getSession();
+        session.getTransaction().begin();
+        session.merge(employee);
+        session.getTransaction().commit();
+        session.close();
     }
 
     @Override
     public void delete(int id) {
-        EntityManager em = JpaConfig.getEntityManager();
-        Employee employee = em.find(Employee.class, id);
-        em.getTransaction().begin();
-        em.remove(employee);
-        em.getTransaction().commit();
-        em.close();
+        Session session = HibernateConfig.getSession();
+        Employee employee = session.find(Employee.class, id);
+        session.getTransaction().begin();
+        session.remove(employee);
+        session.getTransaction().commit();
+        session.close();
     }
 
     @Override
     public Employee findById(int id) {
-        EntityManager em = JpaConfig.getEntityManager();
-        return em.find(Employee.class, id);
+        Session session = HibernateConfig.getSession();
+        return session.find(Employee.class, id);
     }
 
     @Override
     public Integer count() {
-        EntityManager em = JpaConfig.getEntityManager();
+        Session session = HibernateConfig.getSession();
         String sql = "SELECT COUNT(*) FROM Employee";
-        TypedQuery<Long> emPQuery = em.createQuery(sql, Long.class);
+        TypedQuery<Long> emPQuery = session.createQuery(sql, Long.class);
         return Math.toIntExact(emPQuery.getSingleResult());
     }
 }
