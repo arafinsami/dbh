@@ -32,7 +32,7 @@
 <div class="container">
     <div class="row">
         <form action="/edit" method="post">
-            <input type="hidden" class="form-control" name="id" value="${employee.employeeId}">
+            <input type="hidden" class="form-control" name="id" value="${employee.id}">
             <div class="mb-3">
                 <label for="name" class="form-label">Name</label>
                 <input type="text" class="form-control" id="name" name="name" value="${employee.name}" placeholder="Enter Your Name">

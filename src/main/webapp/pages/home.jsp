@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>${title}</title>
     <link rel="stylesheet" type="text/css" href="${path}/resources/css/bootstrap.min.css">
 </head>
 <body>
@@ -40,45 +40,65 @@
         </tr>
         </thead>
         <tbody>
-        <c:forEach var="employee" items="${employees}">
+        <c:forEach var="employee" items="${employees.content}">
             <tr>
-                <th scope="row">${employee.employeeId}</th>
+                <th scope="row">${employee.id}</th>
                 <td>${employee.name}</td>
                 <td>${employee.email}</td>
-                <td><a href="${path}/details?id=<c:out value='${employee.employeeId}'/>">Details</a>&nbsp;
-                    <a href="${path}/edit?id=<c:out value='${employee.employeeId}'/>">Edit</a>&nbsp;
-                <a href="${path}/delete?id=<c:out value='${employee.employeeId}'/>">Delete</a></td>
+                <td><a href="${path}/details/<c:out value='${employee.id}'/>">Details</a>&nbsp;
+                    <a href="${path}/edit/<c:out value='${employee.id}'/>">Edit</a>&nbsp;
+                <a href="${path}/delete/<c:out value='${employee.id}'/>">Delete</a></td>
             </tr>
         </c:forEach>
         </tbody>
     </table>
 
-    <nav aria-label="Page navigation example">
-        <ul class="pagination">
-            <c:if test="${currentPage > 1}">
-                <li class="page-item">
-                    <a class="page-link" href="${path}/?page=${currentPage - 1}" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                        <span class="sr-only">Previous</span>
-                    </a>
-                </li>
-            </c:if>
-            <c:forEach var="i" begin="1" end="${totalPages}">
-                <li class="page-item ${i eq currentPage ? 'active' : ''}">
-                    <a class="page-link" href="${path}/?page=${i}">${i}</a>
-                </li>
-            </c:forEach>
-            <c:if test="${currentPage < totalPages}">
-                <li class="page-item">
-                    <a class="page-link" href="${path}/?page=${currentPage + 1}" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                        <span class="sr-only">Next</span>
-                    </a>
-                </li>
-            </c:if>
-        </ul>
-    </nav>
+    <c:if test="${totalPages > 0}">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <c:choose>
+                    <c:when test="${employees.number == 0}">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">Previous</a>
+                        </li>
+                    </c:when>
+                    <c:otherwise>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=${employees.number - 1}&size=${employees.size}">Previous</a>
+                        </li>
+                    </c:otherwise>
+                </c:choose>
 
+                <c:forEach var="i" begin="0" end="${totalPages - 1}">
+                    <c:choose>
+                        <c:when test="${i == currentPage}">
+                            <li class="page-item active">
+                                <a class="page-link" href="#">${i + 1}</a>
+                            </li>
+                        </c:when>
+                        <c:otherwise>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=${i}&size=${employees.size}">${i + 1}</a>
+                            </li>
+                        </c:otherwise>
+                    </c:choose>
+                </c:forEach>
+
+                <c:choose>
+                    <c:when test="${employees.number + 1 == totalPages}">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">Next</a>
+                        </li>
+                    </c:when>
+                    <c:otherwise>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=${employees.number + 1}&size=${employees.size}">Next</a>
+                        </li>
+                    </c:otherwise>
+                </c:choose>
+            </ul>
+        </nav>
+    </c:if>
 </div>
 <script src="${path}/resources/js/bootstrap.bundle.min.js"></script>
 </body>

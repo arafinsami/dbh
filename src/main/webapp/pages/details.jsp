@@ -41,11 +41,11 @@
         </thead>
         <tbody>
             <tr>
-                <th scope="row">${employee.employeeId}</th>
+                <th scope="row">${employee.id}</th>
                 <td>${employee.name}</td>
                 <td>${employee.email}</td>
                 <td>
-                    <a href="${path}/edit?id=<c:out value='${employee.employeeId}'/>">Edit</a>&nbsp;
+                    <a href="${path}/edit/<c:out value='${employee.id}'/>">Edit</a>&nbsp;
                </td>
             </tr>
         </tbody>
