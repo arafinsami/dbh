@@ -1,21 +1,40 @@
 package com.dbh.service;
 
 import com.dbh.entity.Employee;
+import com.dbh.repository.EmployeeRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.SQLException;
-import java.util.List;
+import java.util.Optional;
 
-public interface EmployeeService {
+@Service
+@RequiredArgsConstructor
+public class EmployeeService {
 
-    List<Employee> findAll(int offset, int recordPerPage) throws SQLException;
+    private final EmployeeRepository employeeRepository;
 
-    boolean save(Employee employee) throws SQLException;
+    @Transactional
+    public Employee save(Employee employee) {
+        return employeeRepository.save(employee);
+    }
 
-    boolean update(Employee employee) throws SQLException;
+    @Transactional(readOnly = true)
+    public Optional<Employee> findById(Long id) {
+        return employeeRepository.findById(id);
+    }
 
-    boolean delete(int id) throws SQLException;
+    @Transactional
+    public void delete(Long id) {
+        Employee employee = employeeRepository.findById(id).orElseThrow(null);
+        employeeRepository.delete(employee);
+    }
 
-    Employee findById(int id) throws SQLException;
-
-    int count() throws SQLException;
+    public Page<Employee> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return employeeRepository.findAll(pageable);
+    }
 }

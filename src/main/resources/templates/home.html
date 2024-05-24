@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}"></title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap.min.css}">
+</head>
+<body>
+
+<div class="container">
+    <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+        <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+            <svg class="bi me-2" width="40" height="32">
+                <use xlink:href="#bootstrap"/>
+            </svg>
+            <span class="fs-4"></span>
+        </a>
+        <ul class="nav nav-pills">
+            <li class="nav-item"><a th:href="@{/}" class="nav-link active" aria-current="page">Home</a>
+            </li>
+            <li class="nav-item"><a th:href="@{/save}" class="nav-link">Add new record</a></li>
+        </ul>
+    </header>
+</div>
+
+<div class="container">
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="employee: ${employees.content}">
+            <th scope="row" th:text="${employee.id}"></th>
+            <td th:text="${employee.name}"></td>
+            <td th:text="${employee.email}"></td>
+            <td><a th:href="@{/details/{id} (id=${employee.id})}">Details</a>&nbsp;
+                <a th:href="@{/edit/{id} (id=${employee.id})}">Edit</a>&nbsp;
+                <a th:href="@{/delete/{id} (id=${employee.id})}">Delete</a></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${totalPages > 0}">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li th:classappend="${employees.number == 0} ? 'disabled'">
+                    <a class="page-link" href="#" th:if="${employees.number == 0}">Previous</a>
+                    <a class="page-link" th:if="${employees.number != 0}"
+                       th:href="@{${pageUri}(page=${employees.number - 1}, size=${employees.size})}">Previous</a>
+                </li>
+
+                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link" th:if="${i == currentPage}" href="#">[[${i + 1}]]</a>
+                    <a class="page-link" th:if="${i != currentPage}"
+                       th:href="@{${pageUri}(page=${i}, size=${employees.size})}">[[${i + 1}]]</a>
+                </li>
+
+                <li th:classappend="${employees.number + 1 == totalPages} ? 'disabled'">
+                    <a class="page-link" href="#" th:if="${employees.number + 1 == totalPages}">Next</a>
+                    <a class="page-link" th:if="${employees.number + 1 != totalPages}"
+                       th:href="@{${pageUri}(page=${employees.number + 1}, size=${employees.size})}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+
+</html>
