@@ -1,66 +1,59 @@
 package com.dbh.controller;
 
+import com.dbh.dto.request.EmployeeRequest;
+import com.dbh.dto.response.EmployeeResponse;
 import com.dbh.entity.Employee;
+import com.dbh.mapper.EmployeeMapper;
 import com.dbh.service.EmployeeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@Tag(name = "Employee API")
+@RequestMapping(path = "employee")
 @RequiredArgsConstructor
 public class EmployeeController {
 
     private final EmployeeService employeeService;
 
-    @GetMapping("/")
-    public String home(Model model, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
-        Page<Employee> employees = employeeService.findAll(page, size);
-        int totalPages = employees.getTotalPages();
-        model.addAttribute("employees", employees);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("title", "Home Page");
-        return "home";
+    private final EmployeeMapper employeeMapper;
+
+    @PostMapping
+    @Operation(summary = "save an employee")
+    public ResponseEntity<?> save(@RequestBody EmployeeRequest dto) {
+        Employee employee = employeeMapper.save(dto);
+        employeeService.save(employee);
+        EmployeeResponse response = employeeMapper.from(employee);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @GetMapping("/delete/{id}")
-    public String delete(@PathVariable Long id) {
+    @PutMapping
+    public ResponseEntity<?> update(@RequestBody EmployeeRequest dto) {
+        Employee employee = employeeService.findById(dto.getId()).orElseThrow();
+        employeeMapper.update(employee, dto);
+        employeeService.save(employee);
+        EmployeeResponse response = employeeMapper.from(employee);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping
+    @Operation(summary = "get all  employees")
+    public ResponseEntity<?> findAll() {
+        List<EmployeeResponse> employeeResponses = employeeService.findAll().stream().map(employeeMapper::from).collect(Collectors.toList());
+        return new ResponseEntity<>(employeeResponses, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "delete employee by id")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
         employeeService.delete(id);
-        return "redirect:/";
-    }
-
-    @GetMapping("/save")
-    public String save(Model model) {
-        Employee employee = new Employee();
-        model.addAttribute("employee", employee);
-        return "save";
-    }
-
-    @PostMapping("/save")
-    public String save(@ModelAttribute Employee employee) {
-        employeeService.save(employee);
-        return "redirect:/";
-    }
-
-    @GetMapping("/details/{id}")
-    public String details(@PathVariable Long id, Model model) {
-        Employee employee = employeeService.findById(id).get();
-        model.addAttribute("employee", employee);
-        return "details";
-    }
-
-    @GetMapping("/edit/{id}")
-    public String edit(@PathVariable Long id, Model model) {
-        Employee employee = employeeService.findById(id).get();
-        model.addAttribute("employee", employee);
-        return "edit";
-    }
-
-    @PostMapping("/edit")
-    public String edit(@ModelAttribute Employee employee) {
-        employeeService.save(employee);
-        return "redirect:/";
+        return new ResponseEntity<>("employee deleted by id: " + id, HttpStatus.OK);
     }
 }
