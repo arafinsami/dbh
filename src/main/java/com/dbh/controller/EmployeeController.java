@@ -5,55 +5,84 @@ import com.dbh.dto.response.EmployeeResponse;
 import com.dbh.entity.Employee;
 import com.dbh.mapper.EmployeeMapper;
 import com.dbh.service.EmployeeService;
+import com.dbh.validation.EmployeeValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.json.simple.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ValidationUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.dbh.exception.ApiError.fieldError;
+import static com.dbh.utils.ResponseBuilder.error;
+import static com.dbh.utils.ResponseBuilder.success;
+import static org.springframework.http.ResponseEntity.badRequest;
+
+
 @RestController
+@RequiredArgsConstructor
 @Tag(name = "Employee API")
 @RequestMapping(path = "employee")
-@RequiredArgsConstructor
 public class EmployeeController {
 
     private final EmployeeService employeeService;
 
     private final EmployeeMapper employeeMapper;
 
+    private final EmployeeValidator employeeValidator;
+
     @PostMapping
     @Operation(summary = "save an employee")
-    public ResponseEntity<?> save(@RequestBody EmployeeRequest dto) {
-        Employee employee = employeeMapper.save(dto);
+    public ResponseEntity<JSONObject> save(@Valid @RequestBody EmployeeRequest request, BindingResult bindingResult) {
+        ValidationUtils.invokeValidator(employeeValidator, request, bindingResult);
+        if (bindingResult.hasErrors()) {
+            return badRequest().body(error(fieldError(bindingResult)).getJson());
+        }
+        Employee employee = employeeMapper.save(request);
         employeeService.save(employee);
         EmployeeResponse response = employeeMapper.from(employee);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(success(response).getJson(), HttpStatus.CREATED);
     }
 
     @PutMapping
-    public ResponseEntity<?> update(@RequestBody EmployeeRequest dto) {
+    public ResponseEntity<JSONObject> update(@Valid @RequestBody EmployeeRequest dto, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return badRequest().body(error(fieldError(bindingResult)).getJson());
+        }
         Employee employee = employeeService.findById(dto.getId()).orElseThrow();
         employeeMapper.update(employee, dto);
         employeeService.save(employee);
         EmployeeResponse response = employeeMapper.from(employee);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(success((response)).getJson(), HttpStatus.OK);
     }
 
     @GetMapping
     @Operation(summary = "get all  employees")
-    public ResponseEntity<?> findAll() {
-        List<EmployeeResponse> employeeResponses = employeeService.findAll().stream().map(employeeMapper::from).collect(Collectors.toList());
-        return new ResponseEntity<>(employeeResponses, HttpStatus.OK);
+    public ResponseEntity<JSONObject> findAll() {
+        List<EmployeeResponse> employeeResponses = employeeService.findAll().stream()
+                .map(employeeMapper::from)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(success(employeeResponses).getJson(), HttpStatus.OK);
+    }
+
+    @GetMapping("{id}")
+    @Operation(summary = "find an employee by id")
+    public ResponseEntity<JSONObject> findById(@PathVariable Long id) {
+        Employee employee = employeeService.findByEmployeeId(id);
+        return new ResponseEntity<>(success(employee).getJson(), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "delete employee by id")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    public ResponseEntity<JSONObject> delete(@PathVariable Long id) {
         employeeService.delete(id);
-        return new ResponseEntity<>("employee deleted by id: " + id, HttpStatus.OK);
+        return new ResponseEntity<>(success("employee deleted by id: " + id).getJson(), HttpStatus.OK);
     }
 }

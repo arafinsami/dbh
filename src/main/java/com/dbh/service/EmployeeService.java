@@ -1,6 +1,7 @@
 package com.dbh.service;
 
 import com.dbh.entity.Employee;
+import com.dbh.exception.ResourceNotFoundException;
 import com.dbh.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,17 @@ public class EmployeeService {
     public void delete(Long id) {
         Employee employee = employeeRepository.findById(id).orElseThrow(null);
         employeeRepository.delete(employee);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Employee> findByEmail(String email) {
+        return employeeRepository.findByEmail(email);
+    }
+
+    @Transactional(readOnly = true)
+    public Employee findByEmployeeId(Long id) {
+        Employee employee = employeeRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
+        return employee;
     }
 
     /*public Page<Employee> findAll(int page, int size) {

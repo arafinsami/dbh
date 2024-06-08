@@ -13,7 +13,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Employee implements Serializable {
+public class EmployeeDetails implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -22,12 +22,8 @@ public class Employee implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
-    private String email;
-
-    private String password;
+    private String details;
 
     @OneToMany
-    private List<EmployeeDetails> employeeDetails;
+    private List<EmployeeCertificates> employeeCertificates;
 }
