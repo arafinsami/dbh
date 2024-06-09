@@ -1,5 +1,6 @@
 package com.dbh.controller;
 
+import com.dbh.dto.projection.EmployeeProjection;
 import com.dbh.dto.request.EmployeeRequest;
 import com.dbh.dto.response.EmployeeResponse;
 import com.dbh.entity.Employee;
@@ -66,9 +67,8 @@ public class EmployeeController {
     @GetMapping
     @Operation(summary = "get all  employees")
     public ResponseEntity<JSONObject> findAll() {
-        List<EmployeeResponse> employeeResponses = employeeService.findAll().stream()
-                .map(employeeMapper::from)
-                .collect(Collectors.toList());
+        List<EmployeeProjection> employeeResponses = employeeService.findAll();
+        //List<Employee> employeeResponses = employeeService.findAll();
         return new ResponseEntity<>(success(employeeResponses).getJson(), HttpStatus.OK);
     }
 
