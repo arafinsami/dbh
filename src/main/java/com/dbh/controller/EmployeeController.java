@@ -7,10 +7,12 @@ import com.dbh.entity.Employee;
 import com.dbh.mapper.EmployeeMapper;
 import com.dbh.service.EmployeeService;
 import com.dbh.validation.EmployeeValidator;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +28,7 @@ import static com.dbh.utils.ResponseBuilder.error;
 import static com.dbh.utils.ResponseBuilder.success;
 import static org.springframework.http.ResponseEntity.badRequest;
 
-
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Employee API")
@@ -66,10 +68,13 @@ public class EmployeeController {
 
     @GetMapping
     @Operation(summary = "get all  employees")
-    public ResponseEntity<JSONObject> findAll() {
-        List<EmployeeProjection> employeeResponses = employeeService.findAll();
+    public ResponseEntity<JSONObject> findAll() throws JsonProcessingException {
+        //List<EmployeeProjection> employeeResponses = employeeService.findAll();
         //List<Employee> employeeResponses = employeeService.findAll();
-        return new ResponseEntity<>(success(employeeResponses).getJson(), HttpStatus.OK);
+        //return new ResponseEntity<>(success(employeeResponses).getJson(), HttpStatus.OK);
+        List<Employee> employees = employeeService.findAll();
+        log.info("employees: {}", employees);
+        return new ResponseEntity<>(success(employees).getJson(), HttpStatus.OK);
     }
 
     @GetMapping("{id}")
