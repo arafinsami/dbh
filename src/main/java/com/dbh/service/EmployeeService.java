@@ -1,39 +1,31 @@
 package com.dbh.service;
 
-import com.dbh.entity.Employee;
-import com.dbh.repository.EmployeeRepository;
+import com.dbh.config.ApiProperties;
+import com.dbh.dto.request.EmployeeRequest;
+import com.dbh.dto.request.LoginRequestDTO;
+import com.dbh.dto.request.SingUpRequestDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Optional;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class EmployeeService {
 
-    private final EmployeeRepository employeeRepository;
-
-    private final EntityManager entityManager;
-
-    private final RestTemplate restTemplate;
+    private final ApiProperties apiProperties;
 
     private final ObjectMapper objectMapper;
 
-    @Transactional
-    public Employee save(Employee employee) throws JsonProcessingException {
-        String queryURL = "http://localhost:9999/dbh-command-api/dbh-employee-command";
+    public EmployeeRequest save(EmployeeRequest employee) throws JsonProcessingException {
+        String queryURL = apiProperties.getCommandApiHost() + apiProperties.getCommandApiPath();
         WebClient webClient = WebClient.builder().build();
-        Mono<String> response = webClient
-                .post()
+        Mono<String> response = webClient.post()
                 .uri(queryURL)
                 .bodyValue(employee)
                 .retrieve()
@@ -43,13 +35,12 @@ public class EmployeeService {
         });
     }
 
-    @Transactional
-    public Employee update(Employee employee) throws JsonProcessingException {
-        String queryURL = "http://localhost:9999/dbh-command-api/dbh-employee-command";
+    public EmployeeRequest update(EmployeeRequest employee, String token) throws JsonProcessingException {
+        String queryURL = apiProperties.getCommandApiHost() + apiProperties.getCommandApiPath();
         WebClient webClient = WebClient.builder().build();
-        Mono<String> response = webClient
-                .put()
+        Mono<String> response = webClient.put()
                 .uri(queryURL)
+                .headers(headers -> headers.setBearerAuth(token))
                 .bodyValue(employee)
                 .retrieve()
                 .bodyToMono(String.class);
@@ -58,17 +49,10 @@ public class EmployeeService {
         });
     }
 
-    @Transactional(readOnly = true)
-    public Optional<Employee> findById(Long id) {
-        return employeeRepository.findById(id);
-    }
-
-    @Transactional
     public void delete(Long id) throws JsonProcessingException {
-        String queryURL = "http://localhost:9999/dbh-command-api/dbh-employee-command/{id}";
+        String queryURL = apiProperties.getCommandApiHost() + apiProperties.getCommandApiPath() + "/{id}";
         WebClient webClient = WebClient.builder().build();
-        Mono<String> response = webClient
-                .delete()
+        Mono<String> response = webClient.delete()
                 .uri(queryURL, id)
                 .retrieve()
                 .bodyToMono(String.class);
@@ -77,18 +61,24 @@ public class EmployeeService {
         });
     }
 
-    @Transactional(readOnly = true)
-    public Optional<Employee> findByEmail(String email) {
-        return employeeRepository.findByEmail(email);
+    public EmployeeRequest findByEmployeeId(Long id, String token) throws JsonProcessingException {
+        String queryURL = apiProperties.getQueryApiHost() + apiProperties.getQueryApiPath() + "/{id}";
+        WebClient webClient = WebClient.builder().build();
+        Mono<String> response = webClient.get()
+                .uri(queryURL, id)
+                .headers(headers -> headers.setBearerAuth(token))
+                .retrieve()
+                .bodyToMono(String.class);
+        String responseString = response.block();
+        return objectMapper.readValue(responseString, new TypeReference<>() {});
     }
 
-    @Transactional(readOnly = true)
-    public Employee findByEmployeeId(Long id) throws JsonProcessingException {
-        String queryURL = "http://localhost:9999/dbh-query-api/dbh-employee-query/{id}";
+    public List<EmployeeRequest> findAll(String token) throws JsonProcessingException {
+        String queryURL = apiProperties.getQueryApiHost() + apiProperties.getQueryApiPath();
         WebClient webClient = WebClient.builder().build();
-        Mono<String> response = webClient
-                .get()
-                .uri(queryURL, id)
+        Mono<String> response = webClient.get()
+                .uri(queryURL)
+                .headers(headers -> headers.setBearerAuth(token))
                 .retrieve()
                 .bodyToMono(String.class);
         String responseString = response.block();
@@ -96,29 +86,25 @@ public class EmployeeService {
         });
     }
 
-    //DTO based projection
-    /*@Transactional(readOnly = true)
-    public List<EmployeeProjection> findAll() {
-        return entityManager.createQuery("select " +
-                        "new com.dbh.dto.projection.EmployeeProjection(e.id, e.email) from Employee e",
-                EmployeeProjection.class).getResultList();
-    }*/
-
-    // Using RestTemplate
-    /*@Transactional(readOnly = true)
-    public List<Employee> findAll() throws JsonProcessingException {
-        String queryURL = "http://localhost:9999/dbh-query-api/dbh-employee-query";
-        ResponseEntity<String> response = restTemplate.getForEntity(queryURL, String.class);
-        return objectMapper.readValue(response.getBody(), new TypeReference<>() {});
-    }*/
-
-    @Transactional(readOnly = true)
-    public List<Employee> findAll() throws JsonProcessingException {
-        String queryURL = "http://localhost:9999/dbh-query-api/dbh-employee-query";
+    public Object login(LoginRequestDTO login) throws JsonProcessingException {
+        String queryURL = apiProperties.getQueryApiHost() + "authentication/login";
         WebClient webClient = WebClient.builder().build();
-        Mono<String> response = webClient
-                .get()
+        Mono<String> response = webClient.post()
                 .uri(queryURL)
+                .bodyValue(login)
+                .retrieve()
+                .bodyToMono(String.class);
+        String responseString = response.block();
+        return objectMapper.readValue(responseString, new TypeReference<>() {
+        });
+    }
+
+    public Object signup(SingUpRequestDTO singUp) throws JsonProcessingException {
+        String queryURL = apiProperties.getQueryApiHost() + "authentication/signup";
+        WebClient webClient = WebClient.builder().build();
+        Mono<String> response = webClient.post()
+                .uri(queryURL)
+                .bodyValue(singUp)
                 .retrieve()
                 .bodyToMono(String.class);
         String responseString = response.block();
