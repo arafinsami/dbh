@@ -101,9 +101,9 @@ public class EmployeeController {
         return new ResponseEntity<>(loginResponseDTO, HttpStatus.OK);
     }
 
-    @PostMapping("signup")
+    @PostMapping("singup")
     @Operation(summary = "signup an employee")
-    public ResponseEntity<Object> login(@RequestBody SingUpRequestDTO singUp) throws JsonProcessingException {
+    public ResponseEntity<Object> singup(@RequestBody SingUpRequestDTO singUp) throws JsonProcessingException {
         Object responseDTO = employeeService.signup(singUp);
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
