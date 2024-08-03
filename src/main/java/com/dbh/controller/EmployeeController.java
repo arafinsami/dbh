@@ -42,10 +42,12 @@ public class EmployeeController {
     @PostMapping
     @Operation(summary = "save an employee")
     public ResponseEntity<JSONObject> save(@Valid @RequestBody EmployeeRequest request,
+                                           @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
                                            BindingResult bindingResult) throws JsonProcessingException {
         if (bindingResult.hasErrors()) {
             return badRequest().body(error(fieldError(bindingResult)).getJson());
         }
+        String token = authorization.replace("Bearer ", "");
         EmployeeRequest employee = employeeService.save(request);
         EmployeeResponse response = employeeMapper.from(employee);
         return new ResponseEntity<>(success(response).getJson(), HttpStatus.CREATED);
@@ -68,7 +70,8 @@ public class EmployeeController {
 
     @GetMapping
     @Operation(summary = "get all  employees")
-    public ResponseEntity<JSONObject> findAll(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) throws JsonProcessingException {
+    public ResponseEntity<JSONObject> findAll(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization)
+            throws JsonProcessingException {
         String token = authorization.replace("Bearer ", "");
         List<EmployeeRequest> employees = employeeService.findAll(token);
         log.info("employees: {}", employees);
@@ -78,7 +81,8 @@ public class EmployeeController {
     @GetMapping("{id}")
     @Operation(summary = "find an employee by id")
     public ResponseEntity<JSONObject> findById(@PathVariable Long id,
-                                               @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) throws JsonProcessingException {
+                                               @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization)
+            throws JsonProcessingException {
         String token = authorization.replace("Bearer ", "");
         EmployeeRequest employee = employeeService.findByEmployeeId(id, token);
         return new ResponseEntity<>(success(employee).getJson(), HttpStatus.OK);
